@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Chemical Stock Check – 40-03-W-14B(18)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1F3864;--blue:#378ADD;--blue-lt:#E6F1FB;--blue-dk:#185FA5;
+  --green-lt:#EAF3DE;--green:#3B6D11;
+  --red-lt:#FCEBEB;--red:#A32D2D;
+  --amber-lt:#FAEEDA;--amber:#854F0B;
+  --gray-lt:#F5F5F5;--gray:#888;--border:#E0E0E0;
+  --text:#1a1a1a;--text2:#666;--white:#fff;
+  --radius:10px;--radius-sm:6px;
+}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#F0F4F8;color:var(--text);min-height:100vh}
+
+/* ── HEADER ── */
+.app-header{background:var(--navy);color:#fff;padding:0}
+.header-inner{max-width:960px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:14px}
+.header-icon{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.header-text h1{font-size:17px;font-weight:600;line-height:1.2}
+.header-text p{font-size:12px;opacity:.7;margin-top:2px}
+
+/* ── TABS ── */
+.tab-bar{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.tab-inner{max-width:960px;margin:0 auto;display:flex}
+.tab-btn{padding:13px 22px;font-size:14px;font-weight:500;border:none;background:none;cursor:pointer;color:var(--text2);border-bottom:3px solid transparent;transition:all .15s;display:flex;align-items:center;gap:6px}
+.tab-btn.active{color:var(--blue-dk);border-bottom-color:var(--blue)}
+.tab-btn:hover{color:var(--text);background:var(--gray-lt)}
+
+/* ── MAIN ── */
+.main{max-width:960px;margin:0 auto;padding:20px 16px}
+
+/* ── CARD ── */
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:16px;overflow:hidden}
+.card-head{background:var(--navy);color:#fff;padding:10px 16px;font-size:13px;font-weight:600;letter-spacing:.03em;display:flex;align-items:center;gap:8px}
+.card-body{padding:16px}
+
+/* ── META ROW ── */
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+.meta-field label{display:block;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.meta-field input,.meta-field select{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:14px;background:#fff;color:var(--text)}
+.meta-field input:focus,.meta-field select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px #378ADD22}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+thead tr{background:var(--navy)}
+thead th{color:#fff;padding:9px 10px;text-align:left;font-weight:500;font-size:12px;white-space:nowrap}
+tbody tr:nth-child(even){background:#FAFBFC}
+tbody tr:hover{background:var(--blue-lt)}
+td{padding:8px 10px;border-bottom:1px solid #F0F0F0;vertical-align:middle}
+.inp-actual{width:100px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px;font-size:13px;text-align:right;background:#FFF9EC;color:var(--text);font-weight:600}
+.inp-actual:focus{outline:none;border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px #378ADD22}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+
+/* ── BADGES ── */
+.badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600;white-space:nowrap}
+.ok{background:var(--green-lt);color:var(--green)}
+.low{background:var(--red-lt);color:var(--red)}
+.high{background:var(--amber-lt);color:var(--amber)}
+.empty{background:var(--gray-lt);color:var(--gray)}
+
+/* ── BUTTONS ── */
+.btn-save{background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:11px 28px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
+.btn-save:hover{background:var(--blue-dk)}
+.btn-save:disabled{background:#B5D4F4;cursor:not-allowed}
+.btn-refresh{background:var(--navy);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px}
+.btn-refresh:hover{background:#2a4a8a}
+
+/* ── CONFIG BAR ── */
+.config-bar{background:#FFF9EC;border:1px solid #F5C842;border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px;font-size:13px}
+.config-bar input{flex:1;border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-size:13px;font-family:monospace;background:#fff}
+.config-bar input:focus{outline:none;border-color:var(--blue)}
+.btn-set{background:var(--navy);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 14px;font-size:13px;cursor:pointer;white-space:nowrap}
+
+/* ── ALERT ── */
+.alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.alert-ok{background:var(--green-lt);color:var(--green)}
+.alert-err{background:var(--red-lt);color:var(--red)}
+.alert-info{background:var(--blue-lt);color:var(--blue-dk)}
+
+/* ── STAT CARDS ── */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center}
+.stat-n{font-size:28px;font-weight:700;color:var(--navy);line-height:1}
+.stat-n.danger{color:var(--red)}
+.stat-n.warn{color:var(--amber)}
+.stat-l{font-size:11px;color:var(--text2);margin-top:4px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+
+/* ── RECOMMEND ── */
+.rec-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #F0F0F0;font-size:13px}
+.rec-item:last-child{border:none}
+.rec-name{font-weight:500}
+.rec-place{font-size:12px;color:var(--text2)}
+
+/* ── LOADER ── */
+.loader{text-align:center;padding:3rem;color:var(--text2);font-size:14px}
+.spin{display:inline-block;animation:spin 1s linear infinite;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .header-inner{padding:12px 14px}
+  .main{padding:12px 10px}
+  .tab-btn{padding:10px 14px;font-size:13px}
+  .inp-actual{width:80px}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-icon">🧪</div>
+    <div class="header-text">
+      <h1>Daily Chemical Stock Check Sheet</h1>
+      <p>40-03-W-14B(18) — Water Treatment Plant</p>
+    </div>
+  </div>
+</header>
+
+<nav class="tab-bar" role="tablist">
+  <div class="tab-inner">
+    <button class="tab-btn active" role="tab" onclick="switchTab('form',this)">📋 กรอกข้อมูล</button>
+    <button class="tab-btn" role="tab" onclick="switchTab('dash',this)">📊 Dashboard</button>
+    <button class="tab-btn" role="tab" onclick="switchTab('setup',this)">⚙️ ตั้งค่า</button>
+  </div>
+</nav>
+
+<main class="main">
+<div id="global-msg"></div>
+
+<!-- ═══════════════ FORM TAB ═══════════════ -->
+<div id="tab-form">
+  <div class="meta-grid">
+    <div class="meta-field">
+      <label>วันที่</label>
+      <input type="date" id="f-date"/>
+    </div>
+    <div class="meta-field">
+      <label>กะ</label>
+      <select id="f-shift">
+        <option value="A">กะ A</option>
+        <option value="B">กะ B</option>
+        <option value="C">กะ C</option>
+      </select>
+    </div>
+    <div class="meta-field">
+      <label>ผู้ตรวจสอบ</label>
+      <input type="text" id="f-checker" placeholder="ชื่อ-สกุล"/>
+    </div>
+    <div class="meta-field">
+      <label>หัวหน้ากะ</label>
+      <input type="text" id="f-leader" placeholder="ชื่อ-สกุล"/>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">🏭 Liquid Chemical in Tank (หน่วย: ลิตร)</div>
+    <div class="card-body" style="padding:0">
+      <div class="tbl-wrap">
+        <table><thead><tr>
+          <th>Chemical Name</th><th>Place</th>
+          <th class="num">Min (L)</th><th class="num">Max (L)</th>
+          <th class="num">Actual (L)</th><th>Status</th>
+        </tr></thead>
+        <tbody id="tbody-tank"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">📊 Liquid Chemical in Tank (หน่วย: %)</div>
+    <div class="card-body" style="padding:0">
+      <div class="tbl-wrap">
+        <table><thead><tr>
+          <th>Chemical Name</th><th>Place</th>
+          <th class="num">Min (%)</th><th class="num">Max (%)</th>
+          <th class="num">Actual (%)</th><th>Status</th>
+        </tr></thead>
+        <tbody id="tbody-pct"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">🪣 Liquid Chemical in Pail (หน่วย: kg)</div>
+    <div class="card-body" style="padding:0">
+      <div class="tbl-wrap">
+        <table><thead><tr>
+          <th>Chemical Name</th><th>Place</th>
+          <th class="num">Min (kg)</th><th class="num">Max (kg)</th>
+          <th class="num">Actual (kg)</th><th>Status</th>
+        </tr></thead>
+        <tbody id="tbody-pail"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:flex-end;padding-bottom:1rem">
+    <button class="btn-save" id="btn-save" onclick="submitForm()">
+      💾 บันทึกข้อมูลลง Google Sheets
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════ DASHBOARD TAB ═══════════════ -->
+<div id="tab-dash" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <span style="font-size:14px;font-weight:600;color:var(--navy)">ภาพรวมสต็อกสารเคมี</span>
+    <button class="btn-refresh" onclick="loadDashboard()">🔄 รีเฟรช</button>
+  </div>
+  <div id="dash-area"><div class="loader"><span class="spin">⏳</span> กำลังโหลด…</div></div>
+</div>
+
+<!-- ═══════════════ SETUP TAB ═══════════════ -->
+<div id="tab-setup" style="display:none">
+  <div class="card">
+    <div class="card-head">⚙️ ตั้งค่า Google Apps Script URL</div>
+    <div class="card-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px">
+        ใส่ Web App URL ที่ได้จากการ Deploy Google Apps Script (ดูคู่มือด้านล่าง)
+      </p>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <input type="text" id="inp-apiurl" placeholder="https://script.google.com/macros/s/AKf.../exec" style="flex:1;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:13px;font-family:monospace"/>
+        <button class="btn-set" onclick="saveApiUrl()">บันทึก</button>
+      </div>
+      <div id="url-status"></div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0"/>
+
+      <div style="font-size:13px;line-height:1.9;color:var(--text)">
+        <p style="font-weight:600;font-size:14px;margin-bottom:8px">📖 คู่มือ Setup (ทำครั้งเดียว)</p>
+        <ol style="padding-left:18px;display:flex;flex-direction:column;gap:6px">
+          <li>เปิด <a href="https://sheets.google.com" target="_blank" style="color:var(--blue)">Google Sheets</a> → สร้าง Spreadsheet ใหม่ → คัดลอก <strong>Sheet ID</strong> จาก URL<br>
+            <code style="font-size:11px;background:#F5F5F5;padding:2px 6px;border-radius:4px">https://docs.google.com/spreadsheets/d/<u>THIS_IS_THE_ID</u>/edit</code>
+          </li>
+          <li>ใน Spreadsheet → <strong>Extensions → Apps Script</strong></li>
+          <li>ลบโค้ดเดิมทั้งหมด → วางโค้ดจากไฟล์ <code>apps_script.gs</code> ที่ให้มา</li>
+          <li>แก้ <code>YOUR_GOOGLE_SHEET_ID</code> ให้เป็น Sheet ID ของคุณ</li>
+          <li>คลิก <strong>Deploy → New deployment → Web App</strong></li>
+          <li>Execute as: <strong>Me</strong> / Who has access: <strong>Anyone</strong> → Deploy</li>
+          <li>คัดลอก <strong>Web App URL</strong> → วางในช่องด้านบน → กดบันทึก</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">🌐 วิธี Deploy บน GitHub Pages (รับ URL ฟรี)</div>
+    <div class="card-body" style="font-size:13px;line-height:1.9;color:var(--text)">
+      <ol style="padding-left:18px;display:flex;flex-direction:column;gap:6px">
+        <li>สมัคร <a href="https://github.com" target="_blank" style="color:var(--blue)">GitHub</a> (ฟรี)</li>
+        <li>สร้าง Repository ใหม่ เช่น <code>chemical-stock</code></li>
+        <li>อัปโหลดไฟล์ <code>index.html</code> นี้เข้า Repository</li>
+        <li>ไปที่ <strong>Settings → Pages → Branch: main → Save</strong></li>
+        <li>ได้ URL: <code>https://username.github.io/chemical-stock/</code></li>
+        <li>แชร์ URL นี้ให้พนักงานทุกคน — เปิดได้ทั้งมือถือและคอมพิวเตอร์</li>
+      </ol>
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+const CHEM = {
+  tank:[
+    {n:"Sulfuric Acid 50%",p:"Cooling BIC1",mn:1000,mx:10000,u:"L"},
+    {n:"Sodium Hypochlorite 10%",p:"Cooling BIC1",mn:1000,mx:10000,u:"L"},
+    {n:"Sulfuric Acid 50%",p:"Cooling BIC2",mn:1000,mx:8000,u:"L"},
+    {n:"Sodium Hypochlorite 10%",p:"Cooling BIC2",mn:1000,mx:8000,u:"L"},
+  ],
+  pct:[
+    {n:"Hydrochloric Acid 35%",p:"Mixed Bed",mn:0.2,mx:1.0,u:"%"},
+    {n:"Sodium Hydroxy 50%",p:"Mixed Bed",mn:0.2,mx:1.0,u:"%"},
+  ],
+  pail:[
+    {n:"Citric Acid 50%",p:"WTP",mn:0,mx:500,u:"kg"},
+    {n:"PERMTREAT PC-191T",p:"WTP",mn:26,mx:520,u:"kg"},
+    {n:"NALCO 7320",p:"WTP",mn:23,mx:460,u:"kg"},
+    {n:"NALCO 7408",p:"WTP",mn:26,mx:520,u:"kg"},
+    {n:"3D TRASAR 3DT120",p:"Cooling",mn:25,mx:500,u:"kg"},
+    {n:"3D TRASAR 3DT125",p:"Cooling",mn:25,mx:500,u:"kg"},
+    {n:"3D TRASAR 3DT199",p:"Cooling",mn:22,mx:440,u:"kg"},
+    {n:"NALCO 7330",p:"Cooling",mn:25,mx:500,u:"kg"},
+    {n:"NALSPERS 73550",p:"Cooling",mn:25,mx:500,u:"kg"},
+    {n:"NALCO TRAC109",p:"Chiller",mn:25,mx:500,u:"kg"},
+    {n:"NALCO 1250",p:"Boiler",mn:25,mx:500,u:"kg"},
+    {n:"Tri ACT 1805",p:"Boiler",mn:20,mx:400,u:"kg"},
+    {n:"NALCO BT-3000",p:"Boiler",mn:20,mx:400,u:"kg"},
+    {n:"R-MC Power Back",p:"Gas Turbine",mn:25,mx:500,u:"kg"},
+  ]
+};
+
+function status(v,mn,mx){
+  if(v===""||v===null||isNaN(+v)) return "empty";
+  return +v<mn?"low":+v>mx?"high":"ok";
+}
+function badge(st){
+  const m={ok:"✔ OK",low:"⚠ LOW",high:"↑ HIGH",empty:"—"};
+  return `<span class="badge ${st}">${m[st]||"—"}</span>`;
+}
+
+// ── BUILD TABLES ──────────────────────────────────────
+function buildTables(){
+  ["tank","pct","pail"].forEach(sec=>{
+    const isL=sec==="tank", isPct=sec==="pct";
+    document.getElementById("tbody-"+sec).innerHTML = CHEM[sec].map((c,i)=>{
+      const step=isL?100:isPct?0.01:1;
+      const fmt=v=>isL?Number(v).toLocaleString():isPct?Number(v).toFixed(2):Number(v).toLocaleString();
+      return `<tr>
+        <td><strong style="font-weight:500">${c.n}</strong></td>
+        <td style="color:var(--text2);font-size:12px">${c.p}</td>
+        <td class="num">${fmt(c.mn)}</td>
+        <td class="num">${fmt(c.mx)}</td>
+        <td class="num">
+          <input class="inp-actual" type="number" step="${step}" min="0"
+            id="${sec}_${i}" placeholder="—"
+            oninput="refreshBadge('${sec}','${i}',${c.mn},${c.mx})"/>
+        </td>
+        <td id="st_${sec}_${i}">${badge("empty")}</td>
+      </tr>`;
+    }).join("");
+  });
+}
+function refreshBadge(sec,i,mn,mx){
+  const v=document.getElementById(`${sec}_${i}`).value;
+  document.getElementById(`st_${sec}_${i}`).innerHTML=badge(status(v,mn,mx));
+}
+
+// ── API URL ───────────────────────────────────────────
+const API_KEY="chem_api_url_v1";
+function getApi(){return localStorage.getItem(API_KEY)||""}
+function saveApiUrl(){
+  const u=document.getElementById("inp-apiurl").value.trim();
+  if(!u){showUrlStatus("กรุณาใส่ URL","err");return;}
+  if(!u.startsWith("https://script.google.com")){showUrlStatus("URL ไม่ถูกต้อง ต้องขึ้นต้นด้วย https://script.google.com","err");return;}
+  localStorage.setItem(API_KEY,u);
+  showUrlStatus("บันทึก URL สำเร็จแล้ว ✓","ok");
+}
+function showUrlStatus(t,type){
+  document.getElementById("url-status").innerHTML=`<div class="alert alert-${type==="ok"?"ok":"err"}">${t}</div>`;
+  setTimeout(()=>{document.getElementById("url-status").innerHTML=""},4000);
+}
+
+// ── SUBMIT ────────────────────────────────────────────
+async function submitForm(){
+  const api=getApi();
+  if(!api){showGlobalMsg("⚙️ กรุณาตั้งค่า Apps Script URL ก่อนในแท็บ 'ตั้งค่า'","info");return;}
+  const date=document.getElementById("f-date").value;
+  const shift=document.getElementById("f-shift").value;
+  const checker=document.getElementById("f-checker").value.trim();
+  const leader=document.getElementById("f-leader").value.trim();
+  if(!date){showGlobalMsg("กรุณาเลือกวันที่","err");return;}
+
+  const rows=[];
+  const SEC_LABELS={tank:"Tank (L)",pct:"Tank (%)",pail:"Pail (kg)"};
+  ["tank","pct","pail"].forEach(sec=>{
+    CHEM[sec].forEach((c,i)=>{
+      const v=document.getElementById(`${sec}_${i}`).value;
+      if(v!==""){
+        rows.push({date,shift,checker,leader,section:SEC_LABELS[sec],
+          name:c.n,place:c.p,min:c.mn,max:c.mx,actual:+v,unit:c.u,
+          status:status(v,c.mn,c.mx)});
+      }
+    });
+  });
+  if(!rows.length){showGlobalMsg("กรุณากรอกค่า Actual อย่างน้อย 1 รายการ","err");return;}
+
+  const btn=document.getElementById("btn-save");
+  btn.disabled=true; btn.textContent="⏳ กำลังบันทึก…";
+  try{
+    const res=await fetch(api,{method:"POST",body:JSON.stringify({rows}),
+      headers:{"Content-Type":"application/json"}});
+    const json=await res.json();
+    if(json.status==="ok"){
+      showGlobalMsg(`✅ บันทึกสำเร็จ ${json.saved} รายการ (${date} กะ ${shift})`,"ok");
+      ["tank","pct","pail"].forEach(sec=>{
+        CHEM[sec].forEach((_,i)=>{
+          document.getElementById(`${sec}_${i}`).value="";
+          document.getElementById(`st_${sec}_${i}`).innerHTML=badge("empty");
+        });
+      });
+    } else {
+      showGlobalMsg("❌ เกิดข้อผิดพลาด: "+json.message,"err");
+    }
+  }catch(e){
+    showGlobalMsg("❌ ไม่สามารถเชื่อมต่อ Apps Script ได้ กรุณาตรวจสอบ URL และสิทธิ์การเข้าถึง","err");
+  }
+  btn.disabled=false; btn.innerHTML="💾 บันทึกข้อมูลลง Google Sheets";
+}
+
+// ── DASHBOARD ─────────────────────────────────────────
+async function loadDashboard(){
+  const api=getApi();
+  document.getElementById("dash-area").innerHTML=`<div class="loader"><span class="spin">⏳</span> กำลังโหลดข้อมูลจาก Google Sheets…</div>`;
+  if(!api){
+    document.getElementById("dash-area").innerHTML=`<div class="alert alert-info">⚙️ กรุณาตั้งค่า Apps Script URL ก่อนในแท็บ 'ตั้งค่า'</div>`;
+    return;
+  }
+  try{
+    const res=await fetch(`${api}?action=summary`);
+    const d=await res.json();
+    if(d.status!=="ok") throw new Error(d.message);
+    renderDash(d);
+  }catch(e){
+    document.getElementById("dash-area").innerHTML=
+      `<div class="alert alert-err">❌ โหลดข้อมูลไม่ได้: ${e.message}</div>`;
+  }
+}
+
+function renderDash(d){
+  const lows=d.lowItems||[];
+  const recent=(d.recent||[]).slice(0,60);
+
+  let h=`<div class="stat-row">
+    <div class="stat"><div class="stat-n">${(d.total||0).toLocaleString()}</div><div class="stat-l">รายการทั้งหมด</div></div>
+    <div class="stat"><div class="stat-n">${d.days||0}</div><div class="stat-l">วันที่บันทึก</div></div>
+    <div class="stat"><div class="stat-n danger">${d.lowCount||0}</div><div class="stat-l">ต่ำกว่า Min</div></div>
+    <div class="stat"><div class="stat-n warn">${d.highCount||0}</div><div class="stat-l">สูงกว่า Max</div></div>
+  </div>`;
+
+  h+=`<div class="card"><div class="card-head">⚠️ สารเคมีที่ต้องสั่งซื้อ (LOW)</div><div class="card-body">`;
+  if(!lows.length){
+    h+=`<div class="alert alert-ok">✔ ทุกรายการอยู่ในเกณฑ์ปกติ</div>`;
+  } else {
+    h+=lows.map(r=>`<div class="rec-item">
+      <div><div class="rec-name">${r.name}</div><div class="rec-place">${r.place} · ${r.cnt} ครั้ง</div></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:var(--text2)">ล่าสุด: ${r.lastActual} ${r.unit}</span>
+        <span class="badge low">สั่งซื้อ</span>
+      </div>
+    </div>`).join("");
+  }
+  h+=`</div></div>`;
+
+  h+=`<div class="card"><div class="card-head">📋 ประวัติการบันทึกล่าสุด (60 รายการ)</div>
+  <div class="card-body" style="padding:0"><div class="tbl-wrap">
+  <table><thead><tr>
+    <th>วันที่</th><th>กะ</th><th>ผู้ตรวจ</th><th>Chemical</th>
+    <th>Place</th><th class="num">Actual</th><th>Unit</th><th>Status</th>
+  </tr></thead><tbody>`;
+
+  if(!recent.length){
+    h+=`<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text2)">ยังไม่มีข้อมูล</td></tr>`;
+  } else {
+    h+=recent.map(r=>`<tr>
+      <td style="white-space:nowrap">${r.Date||""}</td>
+      <td style="text-align:center">${r.Shift||"—"}</td>
+      <td>${r.Checker||"—"}</td>
+      <td style="font-weight:500">${r["Chemical Name"]||""}</td>
+      <td style="color:var(--text2);font-size:12px">${r["Place to Use"]||""}</td>
+      <td class="num">${Number(r.Actual||0).toLocaleString()}</td>
+      <td style="color:var(--text2)">${r.Unit||""}</td>
+      <td>${badge((r.Status||"").toLowerCase()||"empty")}</td>
+    </tr>`).join("");
+  }
+  h+=`</tbody></table></div></div></div>`;
+
+  document.getElementById("dash-area").innerHTML=h;
+}
+
+// ── TABS ──────────────────────────────────────────────
+function switchTab(id,el){
+  ["form","dash","setup"].forEach(t=>document.getElementById("tab-"+t).style.display="none");
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+id).style.display="block";
+  el.classList.add("active");
+  if(id==="dash") loadDashboard();
+  if(id==="setup"){
+    const saved=getApi();
+    if(saved) document.getElementById("inp-apiurl").value=saved;
+  }
+}
+
+function showGlobalMsg(txt,type){
+  const el=document.getElementById("global-msg");
+  const cls={ok:"alert-ok",err:"alert-err",info:"alert-info"};
+  el.innerHTML=`<div class="alert ${cls[type]||"alert-info"}">${txt}</div>`;
+  setTimeout(()=>{el.innerHTML=""},6000);
+}
+
+// ── INIT ──────────────────────────────────────────────
+document.getElementById("f-date").value=new Date().toISOString().split("T")[0];
+buildTables();
+</script>
+</body>
+</html>
